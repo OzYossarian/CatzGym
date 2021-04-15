@@ -130,5 +130,3 @@ def next_week():
 def sleep_until(date_time):
     sleep_time = date_time - datetime.datetime.now()
     time.sleep(sleep_time.total_seconds())
-
-print('Book Catz Gym: 04/04/2021, 14:00, 30'.upper())
