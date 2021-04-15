@@ -1,0 +1,32 @@
+Current Time = 19:33:03
+Current Time = 19:34:00
+Current Time = 19:35:01
+Current Time = 19:36:00
+Current Time = 19:36:16
+Current Time = 19:37:00
+Current Time = 19:38:00
+Current Time = 19:41:00
+Current Time = 19:42:00
+Current Time = 19:43:01
+Current Time = 19:44:00
+Current Time = 19:44:43
+Current Time = 19:45:00
+Current Time = 19:46:01
+Current Time = 19:47:00
+Current Time = 19:48:01
+Current Time = 19:49:00
+Current Time = 19:50:00
+Current Time = 19:51:01
+Current Time = 19:52:00
+Current Time = 19:53:01
+Current Time = 19:54:00
+Current Time = 19:55:00
+Current Time = 19:56:00
+Current Time = 19:57:12
+Current Time = 19:57:12: Booking something...
+Current Time = 20:02:01
+Current Time = 20:02:01: Booking something...
+Current Time = 22:08:19
+Current Time = 22:08:24: Booking something...
+Number of arguments: 2
+Argument list: ['/Users/GeorginaTeague/PycharmProjects/CatzGym/parse_subjects.py', '2021_4_14_43835.txt']
