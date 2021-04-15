@@ -1,23 +1,15 @@
-import datetime
 import urllib
-import time
+import rooms
+import datetime
+
+from users import get_user
+from utils import sleep_until, next_week
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
-
-
-class User:
-    def __init__(self, username, password, name, address):
-        self.username = username
-        self.password = password
-        self.name = name
-        self.address = address
-
-    def description(self):
-        return f'{self.name} ({self.address})'
 
 
 duration_indices = {
@@ -38,38 +30,25 @@ url_params = {
     'month': None,
     'day': None,
     'area': 3,
-    'room': 144,
+    'room': None,
     'hour': None,
     'minute': None,
 }
 
 
-def gym_url(date_time, action):
-    params = url_params.copy()
-    params['year'] = date_time.year
-    params['month'] = date_time.month
-    params['day'] = date_time.day
+def gym_url(date_time, action, room):
+    params = {
+        'view': 'day',
+        'year': date_time.year,
+        'month': date_time.month,
+        'day': date_time.day,
+        'area': 3,
+    }
     if action == 'edit':
+        params['room'] = room.url_id
         params['hour'] = date_time.hour
         params['minute'] = date_time.minute
     return f'{base_url}{actions[action]}{urllib.parse.urlencode(params)}'
-
-
-teague = User('scat7459', '7756+GGsp-', 'Teague', 'Crown Street')
-elise = User('scat7495', '8519-DPnw-', 'Elise', 'Crown Street')
-will = User('scat7381', 'Charlesws7', 'Will', 'Crown Street')
-users = {
-    'alex.townsend-teague@outlook.com': teague,
-    'alexander.teague@stcatz.ox.ac.uk': teague,
-    'william.staunton@stcatz.ox.ac.uk': will,
-}
-
-
-def get_user(sender, booking_time):
-    user = users[sender]
-    if user == teague and booking_time.day % 2 == 0:
-        user = elise
-    return user
 
 
 def login(browser, user):
@@ -81,12 +60,13 @@ def login(browser, user):
     log_in_button.click()
 
 
-def book_gym(booking_time, duration, save_time, sender):
-    user = get_user(sender, booking_time)
+def book_gym(booking_time, duration, save_time, sender, room=rooms.one, user=None):
+    if user is None:
+        user = get_user(sender, booking_time)
 
     with webdriver.Chrome() as browser:
         wait = WebDriverWait(browser, 10)
-        browser.get((gym_url(booking_time, 'edit')))
+        browser.get((gym_url(booking_time, 'edit', room)))
         login(browser, user)
 
         description_input = wait.until(EC.presence_of_element_located((By.ID, 'name')))
@@ -95,19 +75,22 @@ def book_gym(booking_time, duration, save_time, sender):
         end_selection.select_by_index(duration_indices[duration])
 
         save_button = browser.find_element_by_name('save_button')
-        sleep_until(save_time)
+        if save_time is not None:
+            sleep_until(save_time)
         save_button.click()
 
 
-def extend_booking(booking_time, duration, save_time, sender):
-    user = get_user(sender, booking_time)
+def extend_booking(booking_time, duration, save_time, sender, room=rooms.one, user=None):
+    if user is None:
+        user = get_user(sender, booking_time)
+
     with webdriver.Chrome() as browser:
         wait = WebDriverWait(browser, 10)
-        browser.get((gym_url(booking_time, 'index')))
+        browser.get((gym_url(booking_time, 'index', room)))
         login(browser, user)
 
         total_seconds = booking_time.hour * 60 * 60 + booking_time.minute * 60
-        xpath = f'//th[@data-seconds={total_seconds}]/../td[3]//a'
+        xpath = f'//th[@data-seconds={total_seconds}]/../td[{room.column}]//a'
         booking = wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
         booking.click()
 
@@ -119,14 +102,24 @@ def extend_booking(booking_time, duration, save_time, sender):
         end_selection.select_by_index(duration_indices[duration])
 
         save_button = browser.find_element_by_name('save_button')
-        sleep_until(save_time)
+        if save_time is not None:
+            sleep_until(save_time)
         save_button.click()
 
 
-def next_week():
-    return datetime.datetime.now() + datetime.timedelta(days=7)
+def book_gym_now(sender):
+    duration = 30
+    now = datetime.datetime.now()
+    booking_minute = 0 if 0 <= now.minute < 30 else 30
+    booking_time = next_week().replace(minute=booking_minute, second=0, microsecond=0)
+    save_time = booking_time + datetime.timedelta(days=-7, minutes=duration, microseconds=50)
+    book_gym(booking_time, duration, save_time, sender)
 
 
-def sleep_until(date_time):
-    sleep_time = date_time - datetime.datetime.now()
-    time.sleep(sleep_time.total_seconds())
+def extend_booking_now(sender):
+    duration = 60
+    now = datetime.datetime.now()
+    (booking_minute, booking_hour) = (30, now.hour - 1) if 0 <= now.minute < 30 else (0, now.hour)
+    booking_time = next_week().replace(hour=booking_hour, minute=booking_minute, second=0, microsecond=0)
+    save_time = booking_time + datetime.timedelta(days=-7, minutes=duration, microseconds=50)
+    extend_booking(booking_time, duration, save_time, sender)

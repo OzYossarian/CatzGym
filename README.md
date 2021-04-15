@@ -36,3 +36,12 @@ Some examples of shit that won’t fly:
 # Developer notes
 
 The .applescript file needs to go in the right folder - namely `~/Library/Application Scripts/com.apple.mail/`. Mail needs to have full disk access (scary!). Have also given full disk access to cron, crontab and Terminal - don't think all of these are necessary though.
+
+Added the lines:
+```
+SHELL=/bin/bash
+BASH_ENV=~/.bash_profile_conda
+PATH=$PATH:/usr/local/bin
+```
+
+to the start of the crontab file. Also created the file `.bash_profile_conda` and put conda's spiel from `.bash_profile` into it. (This is so that `conda activate` actually works).  

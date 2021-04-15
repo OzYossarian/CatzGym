@@ -2,8 +2,8 @@
 import os
 import sys
 import datetime
+from utils import root, log
 
-root = '/Users/GeorginaTeague/PycharmProjects/CatzGym'
 key = 'Book Catz Gym:'
 cron_day = {
         'SU': 0, 'SUN': 0,
@@ -31,11 +31,6 @@ class CronTime():
 
 def job_command(script, sender):
     return f'conda activate CatzGym && python3 ~/PycharmProjects/CatzGym/{script} {sender} && conda deactivate'
-
-
-def log(text):
-    with open(f'{root}/log.txt', 'a') as f:
-        f.write(f'\n{datetime.datetime.now()}: {text}')
 
 
 def parse_subjects(subject_filename):
